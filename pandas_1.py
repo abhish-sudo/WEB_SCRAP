@@ -17,7 +17,7 @@ if prices:
     price1 = price_text.split("from")[1].strip() if "from" in price_text else "No price found"
     money = prices.find_all('div', attrs={'role': 'listitem'}, class_='collection-item w-dyn-item')
     money_back = money[1].text.strip() if len(money) > 1 else "No second price item found"
-    features1 = "Details on the page"  
+    features1 = price_text.split("Our treatment")[0].strip() 
 else:
     price1 = "No price found"
     features1 = "No features found"
