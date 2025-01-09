@@ -25,13 +25,10 @@ for page in range(1, 36):
     r_second = r_first.find_all('div', class_='styles_cardWrapper__v9DSG styles_show__2jaBP')
 
     for i in r_second:
-        name_real = i.find('div', class_='styles_consumerDetailsWrapper__1aeiF')
-        name_tag = name_real.find('span', class_='typography_heading-xs__jSwUz typography_appearance-default__AAY17', attrs={"data-consumer-name-typography":"true"})
-        name = name_tag.text.strip() if name_tag else "Anonymous"
 
         star = i.find('div', class_='star-rating_starRating__4rrcf star-rating_medium__iN6Ty')
         star_rate = star.find('img') if star else None
-        rating = star_rate.get('alt').split("Rated")[1].strip() if star_rate else "No Rating"
+        rating = star_rate.get('alt').split(" ")[1].strip() if star_rate else "No Rating"
 
         desc_main = i.find('div', class_='styles_reviewContent__nE6HV', attrs={"aria-hidden": "false", "data-review-content": "true"})
         desc = desc_main.find('p', class_='typography_body-l__KUYFJ typography_appearance-default__AAY17', attrs={"data-service-review-text-typography": "true"}) if desc_main else None
@@ -41,10 +38,10 @@ for page in range(1, 36):
         date = date_tag.text.split("experience")[1].strip() if date_tag else "No Date"
 
         data.append({
-            "Reviewer": name,
+            "Date": date,
             "Rating": rating,
             "Review": review,
-            "Date": date
+            
         })
 
     print(f"Page {page} scraped successfully!")
