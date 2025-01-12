@@ -1,3 +1,5 @@
+import schedule
+import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -8,65 +10,64 @@ import logging
 
 logging.basicConfig(filename="scraping_errors.log", level=logging.ERROR)
 
+def scrape_reviews():
+    with open("valid_proxies.txt", "r") as f:
+        proxies = f.read().splitlines()
 
-with open("valid_proxies.txt", "r") as f:
-    proxies = f.read().splitlines()
+    start_page = 1
+    end_page = 10  
+    data = []  
+    counter = 0 
 
+    for page in range(start_page, end_page + 1):
+        try:
+            proxy = proxies[counter % len(proxies)]  
+            counter += 1
 
-start_page = 1
-end_page = 10  
-data = []  
-counter = 0 
+            chrome_options = Options()
+            chrome_options.add_argument(f'--proxy-server={proxy}')
 
+            driver = webdriver.Chrome(options=chrome_options)
 
-for page in range(start_page, end_page + 1):
-    try:
-        
-        proxy = proxies[counter % len(proxies)]  
-        counter += 1
+            url = f"https://www.productreview.com.au/listings/youly?page={page}"
+            driver.get(url)
 
-        chrome_options = Options()
-        chrome_options.add_argument(f'--proxy-server={proxy}')
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.enable-container-query'))
+            )
 
-       
-        driver = webdriver.Chrome(options=chrome_options)
+            review_containers = driver.find_elements(By.CSS_SELECTOR, 'div.enable-container-query')
 
-       
-        url = f"https://www.productreview.com.au/listings/youly?page={page}"
-        driver.get(url)
+            for container in review_containers:
+                try:
+                    time_element = container.find_element(By.TAG_NAME, 'time')
+                    review_date = time_element.get_attribute('datetime')
 
-       
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.enable-container-query'))
-        )
+                    rating_div = container.find_element(By.CSS_SELECTOR, 'div.L2HzME.H22X0I.Z1tQEL.ktks6p._XLHb7.INtA_9.P_x2fR.aI9zhb.SutvaQ')
+                    style_attribute = rating_div.get_attribute('style')
+                    rating_score = style_attribute.split('--pr-rating-score:')[1].split(';')[0].strip() if style_attribute else "N/A"
 
-        
-        review_containers = driver.find_elements(By.CSS_SELECTOR, 'div.enable-container-query')
+                    review_text = container.find_element(By.CSS_SELECTOR, 'div.Eq4SHG._xR2d7.rdvYUY').text
 
-        for container in review_containers:
-            try:
-                
-                time_element = container.find_element(By.TAG_NAME, 'time')
-                review_date = time_element.get_attribute('datetime')
+                    data.append({"Date/Time": review_date, "Stars": rating_score, "Review": review_text})
 
-                rating_div = container.find_element(By.CSS_SELECTOR, 'div.L2HzME.H22X0I.Z1tQEL.ktks6p._XLHb7.INtA_9.P_x2fR.aI9zhb.SutvaQ')
-                style_attribute = rating_div.get_attribute('style')
-                rating_score = style_attribute.split('--pr-rating-score:')[1].split(';')[0].strip() if style_attribute else "N/A"
+                except Exception as e:
+                    logging.error(f"Error extracting data for a review on page {page}: {e}")
 
-                review_text = container.find_element(By.CSS_SELECTOR, 'div.Eq4SHG._xR2d7.rdvYUY').text
+        except Exception as e:
+            logging.error(f"Error loading page {page}: {e}")
 
-               
-                data.append({"Date/Time": review_date, "Stars": rating_score, "Review": review_text})
+        finally:
+            driver.quit()  
 
-            except Exception as e:
-                logging.error(f"Error extracting data for a review on page {page}: {e}")
+    df = pd.DataFrame(data)
+    df.to_csv("reviews.csv", index=False)
+    print("Data saved to reviews.csv")
 
-    except Exception as e:
-        logging.error(f"Error loading page {page}: {e}")
+# Schedule the task to run every 12 weeks
+schedule.every(12).weeks.do(scrape_reviews)
 
-    finally:
-        driver.quit()  
-df = pd.DataFrame(data)
-df.to_csv("reviews.csv", index=False)
-
-print("Data saved to reviews.csv")
+# Keep the script running
+while True:
+    schedule.run_pending()
+    time.sleep(1)
