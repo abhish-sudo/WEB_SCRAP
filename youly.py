@@ -64,10 +64,10 @@ def scrape_reviews():
     df.to_csv("reviews.csv", index=False)
     print("Data saved to reviews.csv")
 
-# Schedule the task to run every 12 weeks
-schedule.every(12).weeks.do(scrape_reviews)
 
-# Keep the script running
+schedule.every(12).weeks.do(scrape_reviews)
+print("Scheduler is running... Press Ctrl+C to stop.")
+
 while True:
     schedule.run_pending()
     time.sleep(1)
