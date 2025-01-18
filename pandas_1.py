@@ -70,7 +70,7 @@ def scrape_weight_loss_data():
     print(f"Data has been saved to {csv_filename}")
 
 
-# Schedule the scraping task to run every 2 weeks
+scrape_weight_loss_data()
 schedule.every(2).weeks.do(scrape_weight_loss_data)
 
 print("Scheduler is running... Press Ctrl+C to stop.")
