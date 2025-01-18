@@ -49,7 +49,7 @@ def scrape_trustpilot_reviews():
     print("Data saved to 'trustpilot_reviews.csv'")
 
 
-
+scrape_trustpilot_reviews()
 schedule.every(2).weeks.do(scrape_trustpilot_reviews)
 
 print("Scheduler is running... Press Ctrl+C to stop.")
