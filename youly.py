@@ -64,7 +64,7 @@ def scrape_reviews():
     df.to_csv("reviews.csv", index=False)
     print("Data saved to reviews.csv")
 
-
+scrape_reviews()
 schedule.every(12).weeks.do(scrape_reviews)
 print("Scheduler is running... Press Ctrl+C to stop.")
 
