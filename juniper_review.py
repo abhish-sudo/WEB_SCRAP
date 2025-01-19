@@ -19,21 +19,21 @@ def scrape_trustpilot_reviews():
         html = response.text
         soup = BeautifulSoup(html, 'lxml')
 
-        r_first = soup.find('div', class_='styles_wrapper__m7di8', attrs={"data-reviews-list-start": "true"})
+        r_first = soup.find('div', class_='styles_wrapper__Zhetz', attrs={"data-reviews-list-start": "true"})
         if not r_first:
             continue  
-        r_second = r_first.find_all('div', class_='styles_cardWrapper__v9DSG styles_show__2jaBP')
+        r_second = r_first.find_all('div', class_='styles_cardWrapper__kOLEb styles_show__qAseP')
 
         for i in r_second:
-            star = i.find('div', class_='star-rating_starRating__4rrcf star-rating_medium__iN6Ty')
+            star = i.find('div', class_='star-rating_starRating__sdbkn star-rating_medium__Oj7C9')
             star_rate = star.find('img') if star else None
             rating = star_rate.get('alt').split(" ")[1].strip() if star_rate else "No Rating"
 
-            desc_main = i.find('div', class_='styles_reviewContent__nE6HV', attrs={"aria-hidden": "false", "data-review-content": "true"})
-            desc = desc_main.find('p', class_='typography_body-l__KUYFJ typography_appearance-default__AAY17', attrs={"data-service-review-text-typography": "true"}) if desc_main else None
+            desc_main = i.find('div', class_='styles_reviewContent__SCYfD', attrs={"aria-hidden": "false", "data-review-content": "true"})
+            desc = desc_main.find('p', class_='typography_body-l__v5JLj typography_appearance-default__t8iAq', attrs={"data-service-review-text-typography": "true"}) if desc_main else None
             review = desc.text.strip() if desc else "No Review"
 
-            date_tag = desc_main.find('p', class_='typography_body-m__xgxZ_ typography_appearance-default__AAY17', attrs={"data-service-review-date-of-experience-typography": "true"}) if desc_main else None
+            date_tag = desc_main.find('p', class_='typography_body-m__k2UI7 typography_appearance-default__t8iAq', attrs={"data-service-review-date-of-experience-typography": "true"}) if desc_main else None
             date = date_tag.text.split("experience")[1].strip() if date_tag else "No Date"
 
             data.append({
@@ -45,8 +45,8 @@ def scrape_trustpilot_reviews():
         print(f"Page {page} scraped successfully!")
 
     df = pd.DataFrame(data)
-    df.to_csv('trustpilot_reviews.csv', index=False, encoding='utf-8')
-    print("Data saved to 'trustpilot_reviews.csv'")
+    df.to_csv('juniper_trustpilot.csv', index=False, encoding='utf-8')
+    print("Data saved to 'juniper_trustpilot.csv'")
 
 
 scrape_trustpilot_reviews()
