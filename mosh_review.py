@@ -27,17 +27,20 @@ def scrape_reviews():
         div_2 = div_1.find_all('div', class_='styles_cardWrapper__kOLEb styles_show__qAseP')
         for i in div_2:
             try:
-                date1 = i.find('div', class_='typography_body-m__k2UI7 typography_appearance-subtle__PYOVM')
-                date2 = date1.find('time')
-                date_time = date2.get('datetime')
-
-                star1 = i.find('div', class_='star-rating_starRating__sdbkn star-rating_medium__Oj7C9')
+                ms = i.find('section', class_='styles_reviewContentwrapper__Tzamw', attrs={"aria-disabled":"false"})
+                rd = ms.find('div', class_='styles_reviewContent__SCYfD', attrs={"aria-hidden":"false","data-review-content":"true"})
+                
+                star1 = ms.find('div', class_='star-rating_starRating__sdbkn star-rating_medium__Oj7C9')
                 star2 = star1.find('img')
                 star = star2.get('alt').split(" ")[1]
 
-                review1 = i.find('div', class_='styles_reviewContent__SCYfD', attrs={"aria-hidden": "false", "data-review-content": "true"})
-                review = review1.find('p').text.strip()
+                review1 = rd.find('p', class_='typography_body-l__v5JLj typography_appearance-default__t8iAq', attrs={"data-service-review-text-typography":"true"})
+                review =review1.text.strip()
 
+                date1 = rd.find('p', class_='typography_body-m__k2UI7 typography_appearance-default__t8iAq', attrs={"data-service-review-date-of-experience-typography":"true"})
+                date2 = date1.find('span', class_='typography_body-m__k2UI7 typography_appearance-subtle__PYOVM')
+                date_time = date2.text.strip()
+                
                 data.append({
                     'Date': date_time,
                     'Stars': star,
@@ -48,8 +51,8 @@ def scrape_reviews():
         print(f"Page {page} scraped successfully.")
 
     df = pd.DataFrame(data)
-    df.to_csv('reviews.csv', index=False, encoding='utf-8')
-    print("Data saved to reviews.csv")
+    df.to_csv('mosh_reviews.csv', index=False, encoding='utf-8')
+    print("Data saved to mosh_reviews.csv")
 
 scrape_reviews()
 schedule.every(2).weeks.do(scrape_reviews)
